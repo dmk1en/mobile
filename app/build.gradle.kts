@@ -21,6 +21,7 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = true
+        buildConfig = true
     }
 
 
@@ -31,6 +32,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "NEWS_API_KEY", "\"${project.properties["NEWS_API_KEY"]}\"")
         }
     }
     compileOptions {
@@ -52,8 +54,17 @@ dependencies {
 
     implementation(libs.androidx.recyclerview)
     implementation(libs.retrofit)
-
     implementation(libs.gson)
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.0")
+    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.6.0")
+
+    implementation("androidx.room:room-ktx:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
+
+    implementation("com.squareup.okhttp3:okhttp:4.11.0")// For OkHttpClient
+    implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
 
     // Test dependencies
     testImplementation(libs.junit)

@@ -1,45 +1,51 @@
 package com.example.newsapp
 
-import android.annotation.SuppressLint
-import android.content.Intent
 import android.os.Bundle
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.util.Log
 import android.widget.Toast
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.newsapp.R
 import com.example.newsapp.adapter.NewsArticlesAdapter
 import com.example.newsapp.model.NewsArticle
+import com.example.newsapp.viewmodel.NewsViewModel
+import kotlinx.coroutines.*
+
 
 class MainActivity : AppCompatActivity() {
-    @SuppressLint("MissingInflatedId")
+    private val viewModel: NewsViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContentView(R.layout.new_article_items)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        val articles = listOf(
-            NewsArticle("Title 1", "Description 1"),
-            NewsArticle("Title 2", "Description 2"),
-            NewsArticle("Title 3", "Description 3")
-        )
+        setContentView(R.layout.activity_main)
 
-        // Tạo Adapter
-        val adapter = NewsArticlesAdapter(articles) { article ->
-            // Xử lý sự kiện click vào mỗi bài viết
-            Toast.makeText(this, "Clicked on: ${article.title}", Toast.LENGTH_SHORT).show()
-        }
-
-        // Thiết lập RecyclerView
+        Log.d("MainActivity", "onCreate called")
+        // Set up RecyclerView
         val recyclerView = findViewById<RecyclerView>(R.id.news_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
+
+        val adapter = NewsArticlesAdapter(emptyList()) { article ->
+            Toast.makeText(this, "Clicked on: ${article.content}", Toast.LENGTH_SHORT).show()
+        }
+
         recyclerView.adapter = adapter
+
+        // Observe LiveData
+        viewModel.allNews.observe(this, Observer { newsList ->
+            if (newsList != null) {
+                val articles = newsList.map { NewsArticle(it.title, it.description ?: "",it.content ?: "") }
+                adapter.updateData(articles)
+            }
+        })
+
+        // Fetch News
+        val country = "us" // or dynamically set based on user input
+        //val apiKey = BuildConfig.NEWS_API_KEY
+        val apiKey = "4d6071a070fb4779a59e624aec9e5f7c"
+        viewModel.fetchNews(country, apiKey)
     }
 }

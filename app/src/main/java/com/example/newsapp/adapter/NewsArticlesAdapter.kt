@@ -1,5 +1,6 @@
 package com.example.newsapp.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -7,29 +8,35 @@ import com.example.newsapp.databinding.NewsArticleItemBinding
 import com.example.newsapp.model.NewsArticle
 
 class NewsArticlesAdapter(
-    private val articles: List<NewsArticle>,
-    private val onClick: (NewsArticle) -> Unit
+    private var articles: List<NewsArticle>,
+    private val onItemClick: (NewsArticle) -> Unit
 ) : RecyclerView.Adapter<NewsArticlesAdapter.NewsViewHolder>() {
 
+    fun updateData(newArticles: List<NewsArticle>) {
+        Log.d("NewsArticlesAdapter", "Updating data with ${newArticles.size} articles")
+        articles = newArticles
+        notifyDataSetChanged()
+    }
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsViewHolder {
-        // Sử dụng View Binding để inflate layout
         val binding = NewsArticleItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return NewsViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: NewsViewHolder, position: Int) {
-        holder.bind(articles[position], onClick)
+        holder.bind(articles[position])
     }
 
     override fun getItemCount(): Int = articles.size
 
-    // ViewHolder sử dụng View Binding
-    class NewsViewHolder(private val binding: NewsArticleItemBinding) : RecyclerView.ViewHolder(binding.root) {
-        fun bind(article: NewsArticle, onClick: (NewsArticle) -> Unit) {
-            // Sử dụng binding để truy xuất và thiết lập dữ liệu vào các View
-            binding.newsTitle.text = article.title
-            binding.newsDescription.text = article.description
-            binding.root.setOnClickListener { onClick(article) }
+    inner class NewsViewHolder(private val binding: NewsArticleItemBinding) : RecyclerView.ViewHolder(binding.root) {
+
+        fun bind(newsArticle: NewsArticle) {
+            binding.newsTitle.text = newsArticle.title
+            binding.newsDescription.text = newsArticle.description
+            binding.root.setOnClickListener {
+                onItemClick(newsArticle)
+            }
         }
     }
+
 }
